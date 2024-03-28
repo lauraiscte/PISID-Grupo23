@@ -19,6 +19,7 @@ public class ReceiveCloud2  implements MqttCallback {
     MqttClient mqttclient;
     static String cloud_server = new String();
     static String cloud_topic = new String();
+    static String cloud_topic1 = new String();
 	static JTextArea documentLabel = new JTextArea("\n");       
 
 	private static void createWindow() {       
@@ -51,6 +52,7 @@ public class ReceiveCloud2  implements MqttCallback {
             p.load(new FileInputStream("ReceiveCloud2.ini"));
             cloud_server = p.getProperty("cloud_server");
             cloud_topic = p.getProperty("mqtt_topic1");
+            cloud_topic1 = p.getProperty("mqtt_topic2");
         } catch (Exception e) {
             System.out.println("Error reading ReceiveCloud.ini file " + e);
             JOptionPane.showMessageDialog(null, "The ReceiveCloud.inifile wasn't found.", "Receive Cloud", JOptionPane.ERROR_MESSAGE);
@@ -67,6 +69,7 @@ public class ReceiveCloud2  implements MqttCallback {
             mqttclient.connect();
             mqttclient.setCallback(this);
             mqttclient.subscribe(cloud_topic);
+            mqttclient.subscribe(cloud_topic1);
         } catch (MqttException e) {
             e.printStackTrace();
         }

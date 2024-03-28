@@ -22,7 +22,8 @@ public class MongoToCloud {
     static String mongo_collection1 = "";
     static String mongo_collection2 = "";
     static String mongo_authentication = "";
-    static String cloud_topic = ""; // Tópico único para a nuvem
+    static String cloud_topic1 = ""; // Tópico 1 para a nuvem
+    static String cloud_topic2 = ""; // Tópico 2 para a nuvem
 
     public static void main(String[] args) {
         try {
@@ -38,7 +39,8 @@ public class MongoToCloud {
             mongo_authentication = p.getProperty("mongo_authentication");
             mongo_collection1 = p.getProperty("mongo_collection1");
             mongo_collection2 = p.getProperty("mongo_collection2");
-            cloud_topic = p.getProperty("cloud_topic");
+            cloud_topic1 = p.getProperty("cloud_topic1");
+            cloud_topic2 = p.getProperty("cloud_topic2");
         } catch (Exception e) {
             System.out.println("Error reading mongoToCloud.ini file " + e);
         }
@@ -87,7 +89,8 @@ public class MongoToCloud {
                     DBObject document = cursor1.next();           
                     // Convertendo o documento para JSON e publicando na nuvem
                     MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
-                    mqttClient.publish(cloud_topic, message);
+                    message.setQos(2); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    mqttClient.publish(cloud_topic1, message);
                 }
                 
                 DBCursor cursor2 = mongocollection2.find();
@@ -95,7 +98,8 @@ public class MongoToCloud {
                     DBObject document = cursor2.next();
                     // Convertendo o documento para JSON e publicando na nuvem
                     MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
-                    mqttClient.publish(cloud_topic, message);
+                    message.setQos(2); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    mqttClient.publish(cloud_topic2, message);
                 }
                 // Aguarda um intervalo antes de verificar novamente o banco de dados
                 Thread.sleep(1000);
