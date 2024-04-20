@@ -45,10 +45,10 @@ public class CloudToMongo  implements MqttCallback {
 	JScrollPane scroll = new JScrollPane (documentLabel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);	
 	scroll.setPreferredSize(new Dimension(600, 200)); 	
 	JButton b1 = new JButton("Stop the program");
-	frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);	
-	frame.getContentPane().add(scroll, BorderLayout.CENTER);	
-	frame.getContentPane().add(b1, BorderLayout.PAGE_END);		
-	frame.setLocationRelativeTo(null);      
+	frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
+	frame.getContentPane().add(scroll, BorderLayout.CENTER);
+	frame.getContentPane().add(b1, BorderLayout.PAGE_END);	
+	frame.setLocationRelativeTo(null);
 	frame.pack();      
 	frame.setVisible(true);    
 	b1.addActionListener(new ActionListener() {

@@ -5,6 +5,9 @@ import com.mongodb.*;
 import com.mongodb.util.JSON;
 import java.util.Properties;
 import java.io.FileInputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @SuppressWarnings("deprecation")
 public class MongoToCloud {
@@ -78,28 +81,75 @@ public class MongoToCloud {
     }
 
     @SuppressWarnings("resource")
-	public static void connectCloud() {
+    public static void connectCloud() {
         try {
             MqttClient mqttClient = new MqttClient(cloud_server, "MongoToCloud");
             mqttClient.connect();
             while (true) {
-                // Consulta MongoDB para obter os dados do tópico
+                // Consulta MongoDB para obter os dados do tópico temperatura (mongocollection1)
                 DBCursor cursor1 = mongocollection1.find();
-                while (cursor1.hasNext()) {        
-                    DBObject document = cursor1.next();           
-                    // Convertendo o documento para JSON e publicando na nuvem
-                    MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
-                    message.setQos(2); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    mqttClient.publish(cloud_topic1, message);
+                while (cursor1.hasNext()) {
+                    DBObject document = cursor1.next();
+                    
+                    // Verifica se o sensor tem como valor 1 ou 2
+                    Integer sensorValue = (Integer) document.get("Sensor");
+                    // Verifica se o campo "Hora" contém a data e hora atual
+                    String hora = (String) document.get("Hora");
+                    
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    LocalDateTime horaAtual = LocalDateTime.now();
+                    String formattedHoraAtual = horaAtual.format(formatter);
+                    
+                    LocalDateTime horaDocumento = LocalDateTime.parse(hora, formatter);
+                    LocalDateTime horaAtualFormatada = LocalDateTime.parse(formattedHoraAtual, formatter);
+                    
+                    
+//                    try {
+//                        DateTimeFormatter formatterMili = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+//                        LocalDateTime horaDocumentoMili = LocalDateTime.parse(hora, formatterMili);
+//                        
+                    if (sensorValue != null && (sensorValue == 1 || sensorValue == 2) && horaDocumento.isEqual(horaAtualFormatada)) {
+//                        if (sensorValue != null && (sensorValue == 1 || sensorValue == 2) && horaDocumentoMili.isEqual(horaAtual)) {
+//                            // Convertendo o documento para JSON e publicando na nuvem
+                            MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
+                            message.setQos(1);
+                            mqttClient.publish(cloud_topic1, message);
+                    } else {
+                        System.out.println("Recebi um dado de temperatura incorreto! Sensor: " + sensorValue + horaAtualFormatada);
+                    }
+//                    } catch (DateTimeParseException e) {
+//                        System.out.println("Formato de hora inválido! Hora: " + hora);
+//                    }
                 }
-                
+
+                // Consulta MongoDB para obter os dados do tópico passagens (mongocollection2)
                 DBCursor cursor2 = mongocollection2.find();
                 while (cursor2.hasNext()) {
                     DBObject document = cursor2.next();
-                    // Convertendo o documento para JSON e publicando na nuvem
-                    MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
-                    message.setQos(2); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    mqttClient.publish(cloud_topic2, message);
+                    
+                    // Verifica se a sala destino tem valor maior que a sala de origem
+                    Integer origem = (Integer) document.get("SalaOrigem");
+                    Integer destino = (Integer) document.get("SalaDestino");
+//                    
+//                    // Verifica se o campo "Hora" contém a data e hora atual
+//                    String hora1 = (String) document.get("Hora");
+//                    LocalDateTime horaAtual1 = LocalDateTime.now();
+//                    try {
+//                        DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+//                        LocalDateTime horaDocumento1 = LocalDateTime.parse(hora1, formatter1);
+//                        
+                    if (origem != null && destino != null && destino > origem && destino - origem == 1) {
+//                        if (origem != null && destino != null && destino > origem && destino - origem == 1 && horaDocumento1.isEqual(horaAtual1)) {
+//                            // Convertendo o documento para JSON e publicando na nuvem
+                            MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
+                            message.setQos(2);
+                            mqttClient.publish(cloud_topic1, message);
+                    } else {
+                        System.out.println("Recebi um dado de passagens incorreto! Origem: " + origem + ", Destino: " + destino);
+                    }
+//                    } catch (DateTimeParseException e) {
+//                        System.out.println("Formato de hora inválido! Hora: " + hora1);
+//                    }
                 }
                 // Aguarda um intervalo antes de verificar novamente o banco de dados
                 Thread.sleep(1000);
@@ -108,5 +158,7 @@ public class MongoToCloud {
             e.printStackTrace();
         }
     }
+
+
 }
 
