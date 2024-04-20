@@ -77,9 +77,7 @@ public class ReceiveCloud2  implements MqttCallback {
     public void messageArrived(String topic, MqttMessage c)
             throws Exception {
         try {
-        	System.out.println("oioioi");
-        	System.out.println(c.toString());
-				documentLabel.append(c.toString()+"\n");	
+        	documentLabel.append(c.toString()+"\n");	
         } catch (Exception e) {
             System.out.println(e);
         }

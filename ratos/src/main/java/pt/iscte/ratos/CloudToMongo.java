@@ -8,6 +8,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.mongodb.*;
 import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 
 import java.util.*;
 //import java.util.Vector;
@@ -140,8 +141,10 @@ public class CloudToMongo  implements MqttCallback {
             }
 
             documentLabel.append(c.toString() + "\n");
+        } catch (JSONParseException e) {
+            System.out.println("Dados incorretos: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Erro ao processar mensagem MQTT: " + e.getMessage());         
         }
     }
 
