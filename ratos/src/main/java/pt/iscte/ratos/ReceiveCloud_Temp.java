@@ -42,6 +42,7 @@ public class ReceiveCloud_Temp  implements MqttCallback {
 	});
 }
 	
+	
     public static void main(String[] args) {
 		createWindow();
         try {
