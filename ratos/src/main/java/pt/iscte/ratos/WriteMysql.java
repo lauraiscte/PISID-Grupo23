@@ -14,6 +14,9 @@ import javax.swing.text.BadLocationException;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import pt.iscte.ratos.ReceiveCloud_Temp;
+import pt.iscte.ratos.ReceiveCloud_Mov;
+
 
 public class WriteMysql {	
 	static JTextArea documentLabel = new JTextArea("\n");
