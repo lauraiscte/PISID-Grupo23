@@ -1,6 +1,8 @@
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\MongoToCloud.java
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\ReceiveCloud.java
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\CloudToMongo.java
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\App.java
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\ReceiveCloud2.java
-C:\Users\lpmou\myproject\PISID-Grupo23\ratos\src\main\java\pt\iscte\ratos\WriteMysql.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/WriteMysql.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/ReceiveCloud.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/MongoToCloud.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/CloudToMongo.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/App.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/ReceiveCloud_Mov.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/ReceiveCloud_Temp.java
+/Users/Mariana/Documents/GitHub/PISID-Grupo23/ratos/src/main/java/pt/iscte/ratos/ReceiveCloud2.java
