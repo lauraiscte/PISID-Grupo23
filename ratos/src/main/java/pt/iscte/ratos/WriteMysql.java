@@ -52,6 +52,7 @@ public class WriteMysql {
 		});
   }
 	
+	
 	public  static void main(String[] args) {
 		createWindow();
 		try {	
