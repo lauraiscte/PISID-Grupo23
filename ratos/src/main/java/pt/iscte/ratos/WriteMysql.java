@@ -3,6 +3,7 @@ package pt.iscte.ratos;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Random;
@@ -106,8 +107,10 @@ public class WriteMysql {
             documentLabelTemp.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
             documentLabelMov.append("SQl Connection:" + sql_database_connection_to + "\n");
             documentLabelMov.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
-        } catch (Exception e) {
-            System.out.println("Mysql Server Destination down, unable to make the connection. " + e);
+        } catch (ClassNotFoundException e) {
+            System.out.println("Driver JDBC não encontrado: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
         }
     }
 
