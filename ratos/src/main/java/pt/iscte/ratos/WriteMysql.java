@@ -102,13 +102,14 @@ public class WriteMysql {
     public void connectDatabase_to() {
         try {
             Class.forName("org.mariadb.jdbc.Driver");
+        	//Class.forName("com.mysql.cj.jdbc.Driver");
             connTo = DriverManager.getConnection(sql_database_connection_to, sql_database_user_to, sql_database_password_to);
             documentLabelTemp.append("SQl Connection:" + sql_database_connection_to + "\n");
             documentLabelTemp.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
             documentLabelMov.append("SQl Connection:" + sql_database_connection_to + "\n");
             documentLabelMov.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
         } catch (ClassNotFoundException e) {
-            System.out.println("Driver JDBC não encontrado: " + e.getMessage());
+            System.out.println("Driver JDBC nao encontrado: " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
         }
