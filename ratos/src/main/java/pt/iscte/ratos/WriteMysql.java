@@ -1,16 +1,16 @@
 package pt.iscte.ratos;
 
-import java.io.FileInputStream;
+// import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
+// import java.util.Properties;
 import java.util.Random;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
+//import javax.swing.text.BadLocationException;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -24,15 +24,15 @@ public class WriteMysql {
     static JTextArea documentLabelMov = new JTextArea("\n");
     
     static Connection connTo;
-    static String sql_database_connection_to = "";
+    static String sql_database_connection_to = "jdbc:mariadb://localhost:3306/modelo_relacional";
     static String sql_database_password_to = "";
-    static String sql_database_user_to = "";
-    static String sql_table_to_temp = "";
-    static String sql_table_to_mov = "";
+    static String sql_database_user_to = "root";
+    static String sql_table_to_temp = "medicoestemperatura";
+    static String sql_table_to_mov = "medicoespassagens";
 
-    static String cloud_server = "";
-    static String cloud_topic = "";
-    static String cloud_topic1 = "";
+    static String cloud_server = "tcp://broker.mqtt-dashboard.com:1883";
+    static String cloud_topic = "pisid_grupo23_temp";
+    static String cloud_topic1 = "pisid_grupo23_mov";
 
     private static void createWindowTemp() {
         JFrame frame = new JFrame("Data Bridge");
@@ -79,22 +79,22 @@ public class WriteMysql {
     public static void main(String[] args) {
         createWindowTemp();
         createWindowMov();
-        try {
-            Properties p = new Properties();
-            p.load(new FileInputStream("WriteMysql.ini"));
-            sql_table_to_temp = p.getProperty("sql_table_to_temp");
-            sql_table_to_mov = p.getProperty("sql_table_to_mov");
-            sql_database_connection_to = p.getProperty("sql_database_connection_to");
-            sql_database_password_to = p.getProperty("sql_database_password_to");
-            sql_database_user_to = p.getProperty("sql_database_user_to");
+        // try {
+        //     // Properties p = new Properties();
+        //     // p.load(new FileInputStream("WriteMysql.ini"));
+        //     // sql_table_to_temp = p.getProperty("sql_table_to_temp");
+        //     // sql_table_to_mov = p.getProperty("sql_table_to_mov");
+        //     // sql_database_connection_to = p.getProperty("sql_database_connection_to");
+        //     // sql_database_password_to = p.getProperty("sql_database_password_to");
+        //     // sql_database_user_to = p.getProperty("sql_database_user_to");
 
-            cloud_server = p.getProperty("cloud_server");
-            cloud_topic = p.getProperty("mqtt_topic1");
-            cloud_topic1 = p.getProperty("mqtt_topic2");
-        } catch (Exception e) {
-            System.out.println("Error reading WriteMysql.ini file " + e);
-            JOptionPane.showMessageDialog(null, "The WriteMysql inifile wasn't found.", "Data Migration", JOptionPane.ERROR_MESSAGE);
-        }
+        //     // cloud_server = p.getProperty("cloud_server");
+        //     // cloud_topic = p.getProperty("mqtt_topic1");
+        //     // cloud_topic1 = p.getProperty("mqtt_topic2");
+        // } catch (Exception e) {
+        //     System.out.println("Error reading WriteMysql.ini file " + e);
+        //     JOptionPane.showMessageDialog(null, "The WriteMysql inifile wasn't found.", "Data Migration", JOptionPane.ERROR_MESSAGE);
+        // }
         new WriteMysql().connectDatabase_to();
         new WriteMysql().ReadData();
     }
@@ -103,6 +103,7 @@ public class WriteMysql {
         try {
             Class.forName("org.mariadb.jdbc.Driver");
         	//Class.forName("com.mysql.cj.jdbc.Driver");
+            //Class.forName("com.mysql.cj.jdbc.Driver");
             connTo = DriverManager.getConnection(sql_database_connection_to, sql_database_user_to, sql_database_password_to);
             documentLabelTemp.append("SQl Connection:" + sql_database_connection_to + "\n");
             documentLabelTemp.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
@@ -150,6 +151,7 @@ public class WriteMysql {
                 String sensor = tokens[2].substring(tokens[2].indexOf(":") + 1).trim();
 
                 String sqlCommand = "INSERT INTO " + table + " (Hora, Leitura, IDSensor) VALUES ('" + hora + "', " + leitura + ", " + sensor + ")";
+                @SuppressWarnings("unused")
                 int result = s.executeUpdate(sqlCommand);
             } else if (tipoSensor.equals("porta")) {
                 String[] tokens = data.split(",");
@@ -158,6 +160,7 @@ public class WriteMysql {
                 String salaDestino = tokens[2].substring(tokens[2].indexOf(":") + 1).trim();
 
                 String sqlCommand = "INSERT INTO " + table + " (Hora, SalaOrigem, SalaDestino) VALUES ('" + hora + "', " + salaOrigem + ", " + salaDestino + ")";
+                @SuppressWarnings("unused")
                 int result = s.executeUpdate(sqlCommand);
             }
             System.out.println("Data inserted into table " + table + " successfully");
