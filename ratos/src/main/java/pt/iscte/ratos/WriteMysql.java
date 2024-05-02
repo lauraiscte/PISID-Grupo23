@@ -3,8 +3,10 @@ package pt.iscte.ratos;
 // import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 // import java.util.Properties;
 import java.util.Random;
 import java.awt.*;
@@ -12,229 +14,254 @@ import java.awt.event.*;
 import javax.swing.*;
 //import javax.swing.text.BadLocationException;
 
+import org.bson.Document;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import org.json.JSONObject;
+
 public class WriteMysql {
 
-    static JTextArea documentLabelTemp = new JTextArea("\n");
-    static JTextArea documentLabelMov = new JTextArea("\n");
-    
-    static Connection connTo;
-    static String sql_database_connection_to = "jdbc:mariadb://localhost:3306/modelo_relacional";
-    static String sql_database_password_to = "";
-    static String sql_database_user_to = "root";
-    static String sql_table_to_temp = "medicoestemperatura";
-    static String sql_table_to_mov = "medicoespassagens";
+	static JTextArea documentLabelTemp = new JTextArea("\n");
+	static JTextArea documentLabelMov = new JTextArea("\n");
 
-    static String cloud_server = "tcp://broker.mqtt-dashboard.com:1883";
-    static String cloud_topic = "pisid_grupo23_temp";
-    static String cloud_topic1 = "pisid_grupo23_mov";
+	static Connection connTo;
+	static String sql_database_connection_to = "jdbc:mariadb://localhost:3306/modelo_relacional";
+	static String sql_database_password_to = "";
+	static String sql_database_user_to = "root";
+	static String sql_table_to_temp = "medicoestemperatura";
+	static String sql_table_to_mov = "medicoespassagens";
 
-    private static void createWindowTemp() {
-        JFrame frame = new JFrame("Data Bridge");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JLabel textLabel = new JLabel("Temperatura Data : ", SwingConstants.CENTER);
-        textLabel.setPreferredSize(new Dimension(600, 30));
-        JScrollPane scroll = new JScrollPane(documentLabelTemp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scroll.setPreferredSize(new Dimension(600, 200));
-        JButton b1 = new JButton("Stop the program");
-        frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
-        frame.getContentPane().add(scroll, BorderLayout.CENTER);
-        frame.getContentPane().add(b1, BorderLayout.PAGE_END);
-        frame.setLocationRelativeTo(null);
-        frame.pack();
-        frame.setVisible(true);
-        b1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                System.exit(0);
-            }
-        });
-    }
-    
-    private static void createWindowMov() {
-        JFrame frame = new JFrame("Data Bridge");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JLabel textLabel = new JLabel("Passagens Data : ", SwingConstants.CENTER);
-        textLabel.setPreferredSize(new Dimension(600, 30));
-        JScrollPane scroll = new JScrollPane(documentLabelMov, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scroll.setPreferredSize(new Dimension(600, 200));
-        JButton b1 = new JButton("Stop the program");
-        frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
-        frame.getContentPane().add(scroll, BorderLayout.CENTER);
-        frame.getContentPane().add(b1, BorderLayout.PAGE_END);
-        frame.setLocationRelativeTo(null);
-        frame.pack();
-        frame.setVisible(true);
-        b1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                System.exit(0);
-            }
-        });
-    }
+	static String cloud_server = "tcp://broker.mqtt-dashboard.com:1883";
+	static String cloud_topic = "pisid_grupo23_temp";
+	static String cloud_topic1 = "pisid_grupo23_mov";
 
-    public static void main(String[] args) {
-        createWindowTemp();
-        createWindowMov();
-        // try {
-        //     // Properties p = new Properties();
-        //     // p.load(new FileInputStream("WriteMysql.ini"));
-        //     // sql_table_to_temp = p.getProperty("sql_table_to_temp");
-        //     // sql_table_to_mov = p.getProperty("sql_table_to_mov");
-        //     // sql_database_connection_to = p.getProperty("sql_database_connection_to");
-        //     // sql_database_password_to = p.getProperty("sql_database_password_to");
-        //     // sql_database_user_to = p.getProperty("sql_database_user_to");
+	private static void createWindowTemp() {
+		JFrame frame = new JFrame("Data Bridge");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JLabel textLabel = new JLabel("Temperatura Data : ", SwingConstants.CENTER);
+		textLabel.setPreferredSize(new Dimension(600, 30));
+		JScrollPane scroll = new JScrollPane(documentLabelTemp, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scroll.setPreferredSize(new Dimension(600, 200));
+		JButton b1 = new JButton("Stop the program");
+		frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
+		frame.getContentPane().add(scroll, BorderLayout.CENTER);
+		frame.getContentPane().add(b1, BorderLayout.PAGE_END);
+		frame.setLocationRelativeTo(null);
+		frame.pack();
+		frame.setVisible(true);
+		b1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				System.exit(0);
+			}
+		});
+	}
 
-        //     // cloud_server = p.getProperty("cloud_server");
-        //     // cloud_topic = p.getProperty("mqtt_topic1");
-        //     // cloud_topic1 = p.getProperty("mqtt_topic2");
-        // } catch (Exception e) {
-        //     System.out.println("Error reading WriteMysql.ini file " + e);
-        //     JOptionPane.showMessageDialog(null, "The WriteMysql inifile wasn't found.", "Data Migration", JOptionPane.ERROR_MESSAGE);
-        // }
-        new WriteMysql().connectDatabase_to();
-        new WriteMysql().ReadData();
-    }
+	private static void createWindowMov() {
+		JFrame frame = new JFrame("Data Bridge");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JLabel textLabel = new JLabel("Passagens Data : ", SwingConstants.CENTER);
+		textLabel.setPreferredSize(new Dimension(600, 30));
+		JScrollPane scroll = new JScrollPane(documentLabelMov, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scroll.setPreferredSize(new Dimension(600, 200));
+		JButton b1 = new JButton("Stop the program");
+		frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
+		frame.getContentPane().add(scroll, BorderLayout.CENTER);
+		frame.getContentPane().add(b1, BorderLayout.PAGE_END);
+		frame.setLocationRelativeTo(null);
+		frame.pack();
+		frame.setVisible(true);
+		b1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				System.exit(0);
+			}
+		});
+	}
 
-    public void connectDatabase_to() {
-        try {
-            Class.forName("org.mariadb.jdbc.Driver");
-        	//Class.forName("com.mysql.cj.jdbc.Driver");
-            //Class.forName("com.mysql.cj.jdbc.Driver");
-            connTo = DriverManager.getConnection(sql_database_connection_to, sql_database_user_to, sql_database_password_to);
-            documentLabelTemp.append("SQl Connection:" + sql_database_connection_to + "\n");
-            documentLabelTemp.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
-            documentLabelMov.append("SQl Connection:" + sql_database_connection_to + "\n");
-            documentLabelMov.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Driver JDBC nao encontrado: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
-        }
-    }
+	public static void main(String[] args) {
+		createWindowTemp();
+		createWindowMov();
+		// try {
+		//     // Properties p = new Properties();
+		//     // p.load(new FileInputStream("WriteMysql.ini"));
+		//     // sql_table_to_temp = p.getProperty("sql_table_to_temp");
+		//     // sql_table_to_mov = p.getProperty("sql_table_to_mov");
+		//     // sql_database_connection_to = p.getProperty("sql_database_connection_to");
+		//     // sql_database_password_to = p.getProperty("sql_database_password_to");
+		//     // sql_database_user_to = p.getProperty("sql_database_user_to");
 
-    public void ReadData() {
-        // Instanciação do objeto ReceiveCloud2 para conectar e receber os dados das clouds
-        ReceiveCloud_Temp cloudReader_temp = new ReceiveCloud_Temp();
-        cloudReader_temp.connecCloud(); // Conecta-se às clouds e começa a receber os dados
+		//     // cloud_server = p.getProperty("cloud_server");
+		//     // cloud_topic = p.getProperty("mqtt_topic1");
+		//     // cloud_topic1 = p.getProperty("mqtt_topic2");
+		// } catch (Exception e) {
+		//     System.out.println("Error reading WriteMysql.ini file " + e);
+		//     JOptionPane.showMessageDialog(null, "The WriteMysql inifile wasn't found.", "Data Migration", JOptionPane.ERROR_MESSAGE);
+		// }
+		new WriteMysql().connectDatabase_to();
+		new WriteMysql().ReadData();
+	}
 
-        ReceiveCloud_Mov cloudReader_mov = new ReceiveCloud_Mov();
-        cloudReader_mov.connecCloud();
+	public void connectDatabase_to() {
+		try {
+			Class.forName("org.mariadb.jdbc.Driver");
+			//Class.forName("com.mysql.cj.jdbc.Driver");
+			//Class.forName("com.mysql.cj.jdbc.Driver");
+			connTo = DriverManager.getConnection(sql_database_connection_to, sql_database_user_to, sql_database_password_to);
+			documentLabelTemp.append("SQl Connection:" + sql_database_connection_to + "\n");
+			documentLabelTemp.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
+			documentLabelMov.append("SQl Connection:" + sql_database_connection_to + "\n");
+			documentLabelMov.append("Connection To MariaDB Destination " + sql_database_connection_to + " Suceeded" + "\n");
+		} catch (ClassNotFoundException e) {
+			System.out.println("Driver JDBC nao encontrado: " + e.getMessage());
+		} catch (SQLException e) {
+			System.out.println("Erro ao conectar ao banco de dados: " + e.getMessage());
+		}
+	}
 
-        // Aguarda um tempo para receber os dados das clouds
-        try {
-            Thread.sleep(60000); // Espera por 1 minuto (ou o tempo necessário)
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+	public void ReadData() {
+		// Instanciação do objeto ReceiveCloud2 para conectar e receber os dados das clouds
+		ReceiveCloud_Temp cloudReader_temp = new ReceiveCloud_Temp();
+		cloudReader_temp.connecCloud(); // Conecta-se às clouds e começa a receber os dados
 
-        // Obtenção dos dados lidos das clouds
-        String dataFromCloudTemp = documentLabelTemp.getText(); // Dados da cloud pisid_grupo23_temp
-        String dataFromCloudMov = documentLabelMov.getText();; // Dados da cloud pisid_grupo23_mov (você precisa implementar a lógica para obter esses dados)
+//		ReceiveCloud_Mov cloudReader_mov = new ReceiveCloud_Mov();
+//		cloudReader_mov.connecCloud();
 
-        // Chama os métodos para inserir dados nas tabelas correspondentes
-        WriteToMySQL(sql_table_to_temp, dataFromCloudTemp, "temperatura");
-        WriteToMySQL(sql_table_to_mov, dataFromCloudMov, "porta");
-    }
+		// Aguarda um tempo para receber os dados das clouds
+		try {
+			Thread.sleep(60000); // Espera por 1 minuto (ou o tempo necessário)
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-    public void WriteToMySQL(String table, String data, String tipoSensor) {
-        try {
-            Statement s = connTo.createStatement();
-            // Verifica o tipo de sensor e constrói a instrução SQL de inserção apropriada
-            if (tipoSensor.equals("temperatura")) {
-                String[] tokens = data.split(",");
-                String hora = tokens[0].substring(tokens[0].indexOf(":") + 1).trim();
-                String leitura = tokens[1].substring(tokens[1].indexOf(":") + 1).trim();
-                String sensor = tokens[2].substring(tokens[2].indexOf(":") + 1).trim();
+		// Obtenção dos dados lidos das clouds
+//		String dataFromCloudTemp = documentLabelTemp.getText(); // Dados da cloud pisid_grupo23_temp
+//		//        System.out.println(dataFromCloudTemp);
+//		String dataFromCloudMov = documentLabelMov.getText();; // Dados da cloud pisid_grupo23_mov (você precisa implementar a lógica para obter esses dados)
 
-                String sqlCommand = "INSERT INTO " + table + " (Hora, Leitura, IDSensor) VALUES ('" + hora + "', " + leitura + ", " + sensor + ")";
-                @SuppressWarnings("unused")
-                int result = s.executeUpdate(sqlCommand);
-            } else if (tipoSensor.equals("porta")) {
-                String[] tokens = data.split(",");
-                String hora = tokens[0].substring(tokens[0].indexOf(":") + 1).trim();
-                String salaOrigem = tokens[1].substring(tokens[1].indexOf(":") + 1).trim();
-                String salaDestino = tokens[2].substring(tokens[2].indexOf(":") + 1).trim();
+		// Chama os métodos para inserir dados nas tabelas correspondentes
+//		WriteToMySQL(sql_table_to_temp, dataFromCloudTemp);
+//		WriteToMySQL(sql_table_to_mov, dataFromCloudMov);
+	}
 
-                String sqlCommand = "INSERT INTO " + table + " (Hora, SalaOrigem, SalaDestino) VALUES ('" + hora + "', " + salaOrigem + ", " + salaDestino + ")";
-                @SuppressWarnings("unused")
-                int result = s.executeUpdate(sqlCommand);
-            }
-            System.out.println("Data inserted into table " + table + " successfully");
-            s.close();
-        } catch (Exception e) {
-            System.out.println("Error inserting data into table " + table + ": " + e);
-        }
-    }
+	public void WriteToMySQL(String table, String data) {
+		try {
+			Document document = Document.parse(data);
 
-    public class ReceiveCloud_Temp implements MqttCallback {
-        MqttClient mqttclient;
+			StringBuilder fieldsBuilder = new StringBuilder();
+			StringBuilder valuesBuilder = new StringBuilder();
 
-        public void connecCloud() {
-            int i;
-            try {
-                i = new Random().nextInt(100000);
-                mqttclient = new MqttClient(cloud_server, "ReceiveCloud" + String.valueOf(i) + "_" + cloud_topic);
-                mqttclient.connect();
-                mqttclient.setCallback(this);
-                mqttclient.subscribe(cloud_topic);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
-        }
+			document.forEach((key, value) -> {
+				if (!key.equals("_id")) {
+					if (fieldsBuilder.length() > 0) {
+						fieldsBuilder.append(", ");
+						valuesBuilder.append(", ");
+					}
+					fieldsBuilder.append(key);
+					valuesBuilder.append("'").append(value.toString().replace("'", "\\'")).append("'");
+					System.out.println(valuesBuilder);
+				}
+			});
 
-        @Override
-        public void messageArrived(String topic, MqttMessage c) throws Exception {
-            try {
-                documentLabelTemp.append(c.toString() + "\n");
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-        }
+			String sqlCommand = "INSERT INTO " + table + " (" + fieldsBuilder + ") VALUES (" + valuesBuilder + ")";
 
-        @Override
-        public void connectionLost(Throwable cause) {
-        }
 
-        @Override
-        public void deliveryComplete(IMqttDeliveryToken token) {
-        }
-    }
+			try {
+				Statement s = connTo.createStatement(); 
+				int result = new Integer(s.executeUpdate(sqlCommand));	
+				s.close();										
+			} catch (Exception e){
+				System.out.println("Error Inserting in the database . " + e); 
+				System.out.println(sqlCommand);
+			}
 
-    public class ReceiveCloud_Mov implements MqttCallback {
-        MqttClient mqttclient;
+		} catch (Exception e) {
+			System.out.println("Error writing to MySQL: " + e.getMessage());
+			e.printStackTrace();
+		}
 
-        public void connecCloud() {
-            int i;
-            try {
-                i = new Random().nextInt(100000);
-                mqttclient = new MqttClient(cloud_server, "ReceiveCloud" + String.valueOf(i) + "_" + cloud_topic1);
-                mqttclient.connect();
-                mqttclient.setCallback(this);
-                mqttclient.subscribe(cloud_topic1);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
-        }
+	}
 
-        @Override
-        public void messageArrived(String topic, MqttMessage c) throws Exception {
-            try {
-                documentLabelMov.append(c.toString() + "\n");
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-        }
 
-        @Override
-        public void connectionLost(Throwable cause) {
-        }
 
-        @Override
-        public void deliveryComplete(IMqttDeliveryToken token) {
-        }
-    }
+
+
+
+	public class ReceiveCloud_Temp implements MqttCallback {
+		MqttClient mqttclient;
+
+		public void connecCloud() {
+			int i;
+			try {
+				i = new Random().nextInt(100000);
+				mqttclient = new MqttClient(cloud_server, "ReceiveCloud" + String.valueOf(i) + "_" + cloud_topic);
+				mqttclient.connect();
+				mqttclient.setCallback(this);
+				mqttclient.subscribe(cloud_topic);
+				mqttclient.subscribe(cloud_topic1);
+			} catch (MqttException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void messageArrived(String topic, MqttMessage c) throws Exception {
+			try {
+		        String payload = new String(c.getPayload());
+		        if (topic.equals(cloud_topic)) {
+		            WriteToMySQL(sql_table_to_temp, payload);
+		        } else if (topic.equals(cloud_topic1)) {
+		            WriteToMySQL(sql_table_to_mov, payload);
+		        }
+		    } catch (Exception e) {
+		        System.out.println(e);
+		    }
+		}
+
+		@Override
+		public void connectionLost(Throwable cause) {
+		}
+
+		@Override
+		public void deliveryComplete(IMqttDeliveryToken token) {
+		}
+	}
+
+//	public class ReceiveCloud_Mov implements MqttCallback {
+//		MqttClient mqttclient;
+//
+//		public void connecCloud() {
+//			int i;
+//			try {
+//				i = new Random().nextInt(100000);
+//				mqttclient = new MqttClient(cloud_server, "ReceiveCloud" + String.valueOf(i) + "_" + cloud_topic1);
+//				mqttclient.connect();
+//				mqttclient.setCallback(this);
+//				mqttclient.subscribe(cloud_topic1);
+//			} catch (MqttException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		@Override
+//		public void messageArrived(String topic, MqttMessage c) throws Exception {
+//			try {
+//		        if (topic.equals(cloud_topic1)) {
+//		            WriteToMySQL(sql_table_to_mov, c.toString());
+//		        } 
+//		    } catch (Exception e) {
+//		        System.out.println(e);
+//		    }
+//		}
+//
+//		@Override
+//		public void connectionLost(Throwable cause) {
+//		}
+//
+//		@Override
+//		public void deliveryComplete(IMqttDeliveryToken token) {
+//		}
+//	}
 }
