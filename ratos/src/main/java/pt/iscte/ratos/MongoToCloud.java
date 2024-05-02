@@ -144,10 +144,10 @@ public class MongoToCloud {
                         DateTimeFormatter formatterMili = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
                         LocalDateTime horaDocumentoMili2 = LocalDateTime.parse(hora2, formatterMili);
                       
-	                    if (origem != null && destino != null && destino > origem && destino - origem == 1) {
+	                    if (origem != null && destino != null) {
 	                            MqttMessage message = new MqttMessage(JSON.serialize(document).getBytes());
 	                            message.setQos(2);
-	                            mqttClient.publish(cloud_topic1, message);
+	                            mqttClient.publish(cloud_topic2, message);
 	                            // Escreve o último ID passado para a cloud na mongocollection3
 	                            writeLastId("sensores_mov", document.get("_id").toString());
 	                    } else {

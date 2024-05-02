@@ -123,8 +123,8 @@ public class WriteMysql {
 
 	public void ReadData() {
 		// Instanciação do objeto ReceiveCloud2 para conectar e receber os dados das clouds
-		ReceiveCloud_Temp cloudReader_temp = new ReceiveCloud_Temp();
-		cloudReader_temp.connecCloud(); // Conecta-se às clouds e começa a receber os dados
+		ReceiveCloud cloudReader= new ReceiveCloud();
+		cloudReader.connecCloud(); // Conecta-se às clouds e começa a receber os dados
 
 //		ReceiveCloud_Mov cloudReader_mov = new ReceiveCloud_Mov();
 //		cloudReader_mov.connecCloud();
@@ -161,7 +161,7 @@ public class WriteMysql {
 					}
 					fieldsBuilder.append(key);
 					valuesBuilder.append("'").append(value.toString().replace("'", "\\'")).append("'");
-					System.out.println(valuesBuilder);
+//					System.out.println(valuesBuilder);
 				}
 			});
 
@@ -189,7 +189,7 @@ public class WriteMysql {
 
 
 
-	public class ReceiveCloud_Temp implements MqttCallback {
+	public class ReceiveCloud implements MqttCallback {
 		MqttClient mqttclient;
 
 		public void connecCloud() {
@@ -228,40 +228,4 @@ public class WriteMysql {
 		public void deliveryComplete(IMqttDeliveryToken token) {
 		}
 	}
-
-//	public class ReceiveCloud_Mov implements MqttCallback {
-//		MqttClient mqttclient;
-//
-//		public void connecCloud() {
-//			int i;
-//			try {
-//				i = new Random().nextInt(100000);
-//				mqttclient = new MqttClient(cloud_server, "ReceiveCloud" + String.valueOf(i) + "_" + cloud_topic1);
-//				mqttclient.connect();
-//				mqttclient.setCallback(this);
-//				mqttclient.subscribe(cloud_topic1);
-//			} catch (MqttException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//
-//		@Override
-//		public void messageArrived(String topic, MqttMessage c) throws Exception {
-//			try {
-//		        if (topic.equals(cloud_topic1)) {
-//		            WriteToMySQL(sql_table_to_mov, c.toString());
-//		        } 
-//		    } catch (Exception e) {
-//		        System.out.println(e);
-//		    }
-//		}
-//
-//		@Override
-//		public void connectionLost(Throwable cause) {
-//		}
-//
-//		@Override
-//		public void deliveryComplete(IMqttDeliveryToken token) {
-//		}
-//	}
 }
