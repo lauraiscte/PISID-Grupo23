@@ -29,7 +29,7 @@ public class WriteMysql {
 	static JTextArea documentLabelMov = new JTextArea("\n");
 
 	static Connection connTo;
-	static String sql_database_connection_to = "jdbc:mariadb://localhost:3306/modelo_relacional";
+	static String sql_database_connection_to = "jdbc:mariadb://localhost:3306/pisid2024";
 	static String sql_database_password_to = "";
 	static String sql_database_user_to = "root";
 	static String sql_table_to_temp = "medicoestemperatura";
